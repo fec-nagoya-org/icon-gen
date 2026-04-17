@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: tailwind build
+      run: bun run build && git add style.css
+      glob: "*.{html,css}"
+    - name: biome check
+      run: bunx --bun biome check --fix {staged_files}
+      glob: "*.{js,ts,jsx,tsx,json,jsonc,css,html}"
+      stage_fixed: true
+
+post-merge:
+  files: git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
+  jobs:
+    - name: bun install
+      glob: "bun.lock"
+      run: bun install

@@ -1,0 +1,17 @@
+{
+	"name": "fec-nagoya-icon-gen",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "tailwindcss -i ./src/input.css -o ./style.css --watch & bun run server.js",
+		"build": "tailwindcss -i ./src/input.css -o ./style.css --minify",
+		"check": "biome check --fix .",
+		"prepare": "lefthook install"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.14",
+		"@tailwindcss/cli": "^4.1.18",
+		"lefthook": "2.1.0",
+		"tailwindcss": "^4.1.18"
+	}
+}

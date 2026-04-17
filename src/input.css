@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+	--color-accent: #ff6b00;
+	--color-accent-dark: #e55a00;
+
+	--font-display: "Modak", cursive;
+	--font-sans: "Noto Sans JP", sans-serif;
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
