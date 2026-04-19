@@ -1,5 +1,6 @@
 const FRAME_SRC = "assets/frame.png";
 const DEFAULT_SIZE = 400;
+const DEFAULT_SCALE = 1.15;
 
 const canvas = document.getElementById("preview");
 const ctx = canvas.getContext("2d");
@@ -75,10 +76,10 @@ const resetTransform = () => {
 	const w = state.userImage.naturalWidth;
 	const h = state.userImage.naturalHeight;
 	state.baseScale = Math.max(canvas.width / w, canvas.height / h);
-	state.scale = 1;
+	state.scale = DEFAULT_SCALE;
 	state.offsetX = (canvas.width - w * state.baseScale) / 2;
 	state.offsetY = (canvas.height - h * state.baseScale) / 2;
-	scaleInput.value = "1";
+	scaleInput.value = String(DEFAULT_SCALE);
 };
 
 /**
