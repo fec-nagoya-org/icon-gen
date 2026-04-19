@@ -1,6 +1,7 @@
 const FRAME_SRC = "assets/frame.png";
 const DEFAULT_SIZE = 400;
-const DEFAULT_SCALE = 1.15;
+// フレームの外側に確保する余白の比率 (フレーム一辺に対する片側の比率)
+const FRAME_MARGIN_RATIO = 0.05;
 
 const canvas = document.getElementById("preview");
 const ctx = canvas.getContext("2d");
@@ -15,6 +16,8 @@ const downloadLink = document.getElementById("download");
 const state = {
 	frameImage: null,
 	userImage: null,
+	frameSize: 0,
+	frameOffset: 0,
 	offsetX: 0,
 	offsetY: 0,
 	scale: 1,
@@ -29,15 +32,22 @@ const state = {
 
 /**
  * フレーム画像を読み込み、canvas のサイズを合わせる
+ *
+ * canvas はフレームの外周に FRAME_MARGIN_RATIO 分の余白を足したサイズにし、
+ * SNS アイコンに設定した際にフレームがトリミングで切れない余白を確保する
  */
 const loadFrame = () => {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		img.onload = () => {
 			state.frameImage = img;
-			const size = img.naturalWidth || DEFAULT_SIZE;
-			canvas.width = size;
-			canvas.height = size;
+			const frameSize = img.naturalWidth || DEFAULT_SIZE;
+			const margin = Math.round(frameSize * FRAME_MARGIN_RATIO);
+			const canvasSize = frameSize + margin * 2;
+			state.frameSize = frameSize;
+			state.frameOffset = margin;
+			canvas.width = canvasSize;
+			canvas.height = canvasSize;
 			render();
 			resolve();
 		};
@@ -69,17 +79,18 @@ const loadUserFile = (file) => {
 };
 
 /**
- * ユーザー画像の位置とスケールを canvas 中央・cover フィットにリセットする
+ * ユーザー画像の位置とスケールをフレーム領域中央・cover フィットにリセットする
  */
 const resetTransform = () => {
 	if (!state.userImage) return;
 	const w = state.userImage.naturalWidth;
 	const h = state.userImage.naturalHeight;
-	state.baseScale = Math.max(canvas.width / w, canvas.height / h);
-	state.scale = DEFAULT_SCALE;
-	state.offsetX = (canvas.width - w * state.baseScale) / 2;
-	state.offsetY = (canvas.height - h * state.baseScale) / 2;
-	scaleInput.value = String(DEFAULT_SCALE);
+	const { frameSize, frameOffset } = state;
+	state.baseScale = Math.max(frameSize / w, frameSize / h);
+	state.scale = 1;
+	state.offsetX = frameOffset + (frameSize - w * state.baseScale) / 2;
+	state.offsetY = frameOffset + (frameSize - h * state.baseScale) / 2;
+	scaleInput.value = "1";
 };
 
 /**
@@ -98,11 +109,24 @@ const render = () => {
 		const cy = state.offsetY + (h * state.baseScale) / 2;
 		const drawX = cx - drawW / 2;
 		const drawY = cy - drawH / 2;
+
+		// ユーザー画像がフレーム外の余白に滲み出さないようフレーム領域にクリップする
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(state.frameOffset, state.frameOffset, state.frameSize, state.frameSize);
+		ctx.clip();
 		ctx.drawImage(state.userImage, drawX, drawY, drawW, drawH);
+		ctx.restore();
 	}
 
 	if (state.frameImage) {
-		ctx.drawImage(state.frameImage, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(
+			state.frameImage,
+			state.frameOffset,
+			state.frameOffset,
+			state.frameSize,
+			state.frameSize,
+		);
 	}
 };
 
